@@ -21,7 +21,7 @@ RSYNC_FLAGS="-vh --progress --modify-window=1 --recursive --ignore-errors"
 
 . $(dirname "$0")/functions.sh
 
-if [ -z "$1" ] ; then
+if [ -z "$HOST" ] ; then
     echo "No hostname given"
     exit 1
 fi
@@ -57,13 +57,24 @@ sudo mkfs.fat ${LODEV}p1
 sudo mount ${LODEV}p1 /mnt
 sudo tar xf boot.tar -C /mnt --numeric-owner
 sudo rsync ${RSYNC_FLAGS} boot-overlay/ /mnt
+cat << EOF | sudo tee /mnt/wpa_supplicant.conf
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=US
+
+network={
+  ssid="$WPA_SSID"
+  scan_ssid=1
+  psk="$WPA_PASS"
+}
+EOF
 sudo umount /mnt
 
 sudo mkfs.ext4 ${LODEV}p2
 sudo mount ${LODEV}p2 /mnt
 sudo tar xf custom-root.tar -C /mnt --numeric-owner
 
-sudo /bin/bash -c "echo $1 > /mnt/etc/hostname"
+sudo /bin/bash -c "echo ${HOST} > /mnt/etc/hostname"
 
 PIDOCK_README=$(cat <<EOF
 This raspberry pi has been customized with the Dockerfile

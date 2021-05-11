@@ -20,11 +20,6 @@ import sys
 import argparse
 import subprocess
 
-_default_dev='/dev/mmcblk0'
-_default_host='raspberrypi'
-_default_passwd='raspberry'
-_default_img='raspbian.img'
-
 scripts = {
     'extract': 'support/1-extract.sh',
     'build': 'support/2-build.sh',
@@ -32,10 +27,13 @@ scripts = {
     'flash': 'support/4-flash.sh',
 }
 
-def run_script(script, args=[]):
-    command = ['/bin/bash', scripts[script]] + args
 
-    proc = subprocess.Popen(command)
+def run_script(script, env=None):
+    command = ['/bin/bash', scripts[script]]
+
+    proc = subprocess.Popen(
+        command, env={k.upper(): v for (k, v) in env.items() if v is not None})
+
     proc.wait()
     if proc.returncode == 0:
         return True
@@ -46,29 +44,18 @@ def run_script(script, args=[]):
         ))
         return False
 
+
 def main(args):
     dev_prompt_actions = ['all', 'flash']
     if args.action in dev_prompt_actions and not args.dev:
-        print(
-            'WARNING: This will overwrite the contents of {}'.format(
-                _default_dev
-            )
-        )
-        response = input('Proceed? [y/N]: ')
-        if response.lower() != 'y':
-            print('aborting')
-            return
-
-    device = args.dev if args.dev else _default_dev
-    host = args.host if args.host else _default_host
-    passwd = args.passwd if args.passwd else _default_passwd
-    img = args.img if args.img else _default_img
+        print('ERROR: must provide device with --dev')
+        return
 
     all_actions = [
-        ('extract', lambda: run_script('extract', [img])),
-        ('build', lambda: run_script('build', [passwd])),
-        ('compose', lambda: run_script('compose', [host])),
-        ('flash', lambda: run_script('flash', [device])),
+        ('extract', lambda: run_script('extract', vars(args))),
+        ('build', lambda: run_script('build', vars(args))),
+        ('compose', lambda: run_script('compose', vars(args))),
+        ('flash', lambda: run_script('flash', vars(args))),
     ]
 
     actions = None
@@ -83,15 +70,18 @@ def main(args):
             print('Failed {}'.format(action[0]))
             break
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'action',
         choices=['all', 'extract', 'build', 'compose', 'flash']
     )
-    parser.add_argument('--host', type=str)
+    parser.add_argument('--host', type=str, default='raspberrypi')
     parser.add_argument('--dev', type=str)
-    parser.add_argument('--passwd', type=str)
-    parser.add_argument('--img', type=str)
+    parser.add_argument('--passwd', type=str, default='raspberry')
+    parser.add_argument('--wpa-ssid', type=str)
+    parser.add_argument('--wpa-pass', type=str)
+    parser.add_argument('--img', type=str, default='raspbian.img')
     args = parser.parse_args()
     main(args)

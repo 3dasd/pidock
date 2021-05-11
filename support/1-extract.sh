@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ -z "$1" ] ; then
+if [ -z "${IMG}" ] ; then
     echo "No file given"
     exit 1
 fi
@@ -27,12 +27,12 @@ do_umount
 set -e
 
 echo "Creating ${PT_FILENAME}"
-sfdisk -d "${1}" > "${PT_FILENAME}"
+sfdisk -d "${IMG}" > "${PT_FILENAME}"
 
-losetup -a | grep "${1}" | awk -F: '{ print $1 }' | \
+losetup -a | grep "${IMG}" | awk -F: '{ print $1 }' | \
     xargs -r sudo losetup -d
-sudo losetup -fP ${1}
-LODEV=$(losetup -a | grep "${1}" | awk -F: '{ print $1 }')
+sudo losetup -fP ${IMG}
+LODEV=$(losetup -a | grep "${IMG}" | awk -F: '{ print $1 }')
 trap 'do_umount' ERR
 
 echo "Creating boot.tar"

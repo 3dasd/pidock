@@ -18,9 +18,9 @@
 
 set -e
 
-if [ -z "$1" ] ; then
+if [ -z "${PASSWD}" ] ; then
     echo "No password given"
     exit 1
 fi
 
-docker build --build-arg PI_PASSWORD=$1 -t raspi-custom .
+docker build --build-arg PI_PASSWORD=${PASSWD} -t raspi-custom .

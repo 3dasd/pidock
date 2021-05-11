@@ -18,15 +18,15 @@
 
 set -e
 
-if [ -z "$1" ] ; then
+if [ -z "${DEV}}" ] ; then
     echo "No device given"
     exit 1
 fi
 
-if [ ! -e $1 ] ; then
+if [ ! -e ${DEV} ] ; then
     echo "Flash device not present"
     exit 1
 fi
 
-sudo dd if=custom.img of=$1 bs=4M status=progress
+sudo dd if=custom.img of=${DEV} bs=4M status=progress
 sync
