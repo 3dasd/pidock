@@ -1,0 +1,16 @@
+[Unit]
+Description=pio remote agent
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+Environment="PLATFORMIO_AUTH_TOKEN=YOUR-TOKEN"
+WorkingDirectory=/home/pi
+ExecStart=/home/pi/.platformio/penv/bin/pio remote agent start
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
