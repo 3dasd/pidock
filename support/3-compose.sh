@@ -57,7 +57,8 @@ sudo mkfs.fat ${LODEV}p1
 sudo mount ${LODEV}p1 /mnt
 sudo tar xf boot.tar -C /mnt --numeric-owner
 sudo rsync ${RSYNC_FLAGS} boot-overlay/ /mnt
-cat << EOF | sudo tee /mnt/wpa_supplicant.conf
+if [ ! -z "$WPA_SSID" ] ; then
+    cat << EOF | sudo tee /mnt/wpa_supplicant.conf
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=US
@@ -68,6 +69,10 @@ network={
   psk="$WPA_PASS"
 }
 EOF
+else
+    echo "WARNING Skipping Wifi setup, as no SSID was provided."
+fi
+
 sudo umount /mnt
 
 sudo mkfs.ext4 ${LODEV}p2

@@ -7,9 +7,6 @@ RUN apt-get update && \
         vim tmux wiringpi \
         python3-pip libffi-dev libssl-dev
 
-ARG PI_PASSWORD
-RUN echo "pi:${PI_PASSWORD}" | chpasswd
-
 # Enable pubkey auth only
 RUN sed -i 's/#PubkeyAuthentication.*/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
 RUN sed -i 's/#PasswordAuthentication.*/PasswordAuthentication no/g' /etc/ssh/sshd_config
@@ -20,9 +17,22 @@ RUN sudo -u pi python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platfo
 RUN sudo -u pi /home/pi/.platformio/penv/bin/pio update
 # This will fail but that's okay, we're only doing this to download
 # every dependency of the remote agent.
-RUN sudo -u pi /home/pi/.platformio/penv/bin/pio remote agent start
+RUN sudo -u pi /home/pi/.platformio/penv/bin/pio remote agent
+# Add `pio` to the path
+RUN echo 'export PATH=$PATH:/home/pi/.platformio/penv/bin' >> /home/pi/.bashrc
+# HACK: Remote upload fails without this...
+RUN ln -s /home/pi/.platformio/penv/bin/platformio /bin/platformio
 
+# Enable access to serial port
+RUN usermod -a -G dialout pi
+
+# Copy everything from root-overlay/
 ADD root-overlay /
 RUN chown -R pi:pi /home/pi
-
-RUN echo 'export PATH=$PATH:/home/pi/.platformio/penv/bin' >> /home/pi/.bashrc
+ 
+# Manual steps required:
+# - add SSH pub key in /home/pi/.ssh/authorized_keys
+# - enable serial (but NOT login via serial) with raspi-config
+# - edit /etc/systemd/system/pio-remote.service to add token
+# - sudo systemctl enable pio-remote && sudo systemctl start pio-remote
+# - 

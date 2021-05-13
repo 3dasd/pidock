@@ -79,7 +79,6 @@ if __name__ == '__main__':
     )
     parser.add_argument('--host', type=str, default='raspberrypi')
     parser.add_argument('--dev', type=str)
-    parser.add_argument('--passwd', type=str, default='raspberry')
     parser.add_argument('--wpa-ssid', type=str)
     parser.add_argument('--wpa-pass', type=str)
     parser.add_argument('--img', type=str, default='raspbian.img')

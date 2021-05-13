@@ -36,7 +36,6 @@ Move desired raspbian base disk image to file `raspbian.img`
 ```
 ./pidock.py <action>
     [--host <hostname=raspberrypi>]
-    [--passwd <password=raspberry>]
     [--dev <flash_device=/dev/mmcblk0>]
     [--img <base_image=raspbian.img>]
 ```
@@ -48,9 +47,8 @@ Where action is one of the following
 `compose` - Creates custom.img from built docker image\
 `flash` - Flashes custom.img onto memory device (default: /dev/mmcblk0)
 
-Use Dockerfile to build the pi's root as if it were a docker image.  Example
-simply changes pi's password to that specified by --passwd instead of the
-normal 'raspberry'.  And installs vim, because why not?
+Use Dockerfile to build the pi's root as if it were a docker image.
+Example installs vim, because why not?
 
 Files in boot-overlay and root-overlay will be copied onto their respective
 partition.  For example, touching 'ssh' on the boot partition
