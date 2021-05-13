@@ -31,6 +31,7 @@ ADD root-overlay /
 RUN chown -R pi:pi /home/pi
  
 # Manual steps required:
+# - enable wifi
 # - add SSH pub key in /home/pi/.ssh/authorized_keys
 # - enable serial (but NOT login via serial) with raspi-config
 # - edit /etc/systemd/system/pio-remote.service to add token
