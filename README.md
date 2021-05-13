@@ -1,73 +1,28 @@
+# 3dasd Raspbian image builder
 
-# Dockerfile-driven raspberry pi disk image creator "pidock"
+This was forked from [pidock](https://github.com/eringr/pidock). See the original readme there.
 
-TIRED: Maintaining your fleet of raspberry pi devices by running commands and
-writing things on them ad-hoc and probably replicating by manually creating
-large, corruptible disk images with undocumented contents
+## Usage
 
-WIRED: Maintaining your fleet of raspberry pi devices by generating disk images
-from a dockerfile containing their IP in one place concentrated enough
-to be self-documenting and highly reproducible, able to be deployed onto the
-latest version of an upstream base image
+> See the original readme for prerequisites: https://github.com/eringr/pidock
 
-## Requirements
+Download a base Raspbian image from https://www.raspberrypi.org/software/
+and place it into the root of the repo as `raspbian.img`.
 
-To run commands as pi root during image build, the host machine must be
-set up with binfmt_misc to run qemu for arm binaries
+Run the following replacing `YOUR-DEVICE` with your SD card's device:
 
-On ubuntu 20: `apt install qemu-user-static`
-
-This package doesn't install binfmt_misc properly prior to ubuntu 20.  Run
-`./binfmt_setup.sh` if you're running an older version of ubuntu or debian.
- Other distributions might require other packages or steps.
-
-Another easy (but insecure) method to do this is to run the following command
-
-`docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
-
-See https://github.com/multiarch/qemu-user-static
-
-Also requires python3 and docker
-
-## How to use
-
-Move desired raspbian base disk image to file `raspbian.img`
-
+```sh
+./pidock.py all --dev /dev/YOUR-DEVICE
 ```
-./pidock.py <action>
-    [--host <hostname=raspberrypi>]
-    [--dev <flash_device=/dev/mmcblk0>]
-    [--img <base_image=raspbian.img>]
+
+## Advanced usage
+
+The "official" image doesn't include any Wifi settings but you could bake
+your network details into the image with:
+
+```sh
+./pidock.py all --dev /dev/YOUR-DEVICE --wpa-ssid YOUR-SSID --wpa-pass YOUR-PASSWORD
 ```
-Where action is one of the following
 
-`all` - Does the same as the next four commands in order\
-`extract` - Extracts files from raspbian.img to run in docker\
-`build` - Builds docker image from extracted files and custom additions\
-`compose` - Creates custom.img from built docker image\
-`flash` - Flashes custom.img onto memory device (default: /dev/mmcblk0)
-
-Use Dockerfile to build the pi's root as if it were a docker image.
-Example installs vim, because why not?
-
-Files in boot-overlay and root-overlay will be copied onto their respective
-partition.  For example, touching 'ssh' on the boot partition
-will cause raspbian to enable ssh.
-
-An example wpa_supplicant.conf is provided; if copied into boot-overlay,
-raspbian will use its ssid/psk information and auto connect on first boot.
-
-## Permissions
-
-Note: currently requires sudo access to work around multiple permission issues
-
-## Errors
-
-`standard_init_linux.go:211: exec user process caused "exec format error"`
-
-Your binfmt_misc isn't set up correctly and docker is unable to run an ARM
-binary
-
-## Author
-
-Erin Hensel `<hens0093@gmail.com>`; Copyright 2020 Boulder Engineering Studio
+> Warning! These will also show up in the standard output of the pidock process, be
+careful if you're saving that log!
